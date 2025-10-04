@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>Apkmodderkings - Modified UI</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root{
+      --bg:#0a0d16;
+      --card:#161b2c;
+      --card-2:#0f1724;
+      --purple:#6a00ff;
+      --cyan:#00e0ff;
+      --green:#00ff9d;
+      --danger:#ff3d3d;
+      --muted:#9aa5b8;
+      --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, "Poppins",sans-serif;
+      background:linear-gradient(160deg,#05060a,#071125 60%);
+      color:#fff;
+      padding:18px;
+    }
+    .container{max-width:980px;margin:0 auto}
+    .panel{
+      background:linear-gradient(180deg,var(--card),var(--card-2));
+      border-radius:14px;
+      padding:16px;
+      margin-bottom:16px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .top-row{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand img{width:56px;height:56px;border-radius:12px;box-shadow:0 6px 20px rgba(0,224,255,0.06)}
+    .brand .titles h2{margin:0;font-size:18px;color:var(--cyan);font-weight:800}
+    .brand .titles p{margin:2px 0 0;color:var(--muted);font-size:12px}
+    .meta{display:flex;gap:8px;align-items:center}
+    .meta .chip{
+      background:var(--glass);
+      padding:8px 12px;border-radius:999px;font-weight:700;font-size:13px;color:var(--muted);
+      border:1px solid rgba(255,255,255,0.02)
+    }
+
+    /* Stage */
+    .stage{margin-top:12px;text-align:center;padding:22px}
+    .label{font-size:13px;color:var(--muted)}
+    .value{font-size:20px;font-weight:700;margin:6px 0}
+    .result{font-size:34px;font-weight:900;margin:10px 0}
+    .result.big{color:#7fff9f}
+    .result.small{color:#ff6e6e}
+    .server-row{margin-top:14px}
+    .server-btn{
+      padding:12px 22px;border:none;border-radius:28px;font-size:14px;font-weight:700;
+      background:linear-gradient(90deg,var(--cyan),var(--green));color:#000;cursor:pointer;
+      transition:all .25s ease;box-shadow:0 10px 30px rgba(0,224,255,0.06)
+    }
+    .footer-note{margin-top:8px;font-size:13px;font-weight:700;color:#ffda6b}
+
+    /* Buy button area */
+    .buy-area{
+      display:flex;gap:12px;align-items:center;justify-content:center;margin-top:18px;
+      flex-wrap:wrap;
+    }
+    .btn-buy{
+      background:linear-gradient(90deg,#ffd36d,#ff8b6e);
+      color:#111;padding:14px 20px;border-radius:12px;border:none;font-weight:900;
+      font-size:16px;cursor:pointer;box-shadow:0 10px 30px rgba(255,140,110,0.12)
+    }
+    .btn-secondary{
+      background:transparent;border:1px solid rgba(255,255,255,0.06);padding:10px 14px;border-radius:10px;
+      color:var(--muted);cursor:pointer;font-weight:700;
+    }
+
+    /* Floating Telegram icon */
+    .tg-float{
+      position:fixed;right:18px;bottom:18px;width:56px;height:56px;border-radius:50%;
+      background:linear-gradient(135deg,#0088cc,#00e0ff);display:flex;align-items:center;justify-content:center;
+      box-shadow:0 10px 30px rgba(0,0,0,0.5);z-index:1600;cursor:pointer;
+    }
+    .tg-float i{font-size:22px;color:#fff}
+
+    /* Toast */
+    .toast{
+      position:fixed;
+      bottom:90px;
+      left:50%;
+      transform:translateX(-50%) translateY(20px);
+      padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700;
+      opacity:0;transition:all .28s ease;z-index:10000;
+      box-shadow:0 12px 32px rgba(0,0,0,0.6)
+    }
+    .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+    .toast.success{background:linear-gradient(90deg,#bfffbf,#00ff9d);color:#022}
+    .toast.error{background:linear-gradient(90deg,#ffb3b3,#ff6e6e);color:#3a0000}
+    .toast.info{background:linear-gradient(90deg,#e2f0ff,#d8eaff);color:#00283a}
+
+    /* Overlay modals */
+    .overlay {
+      position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);
+      display:none;align-items:center;justify-content:center;z-index:2000;padding:18px;
+    }
+    .modal {
+      width:100%;max-width:460px;border-radius:14px;background:linear-gradient(180deg,#ffffff,#f7f9ff);
+      color:#021024;padding:18px;box-shadow:0 18px 60px rgba(2,16,36,0.6);border:1px solid rgba(2,16,36,0.06);
+      transform:translateY(8px);animation:modalIn .22s ease;
+    }
+    @keyframes modalIn {from{opacity:0;transform:translateY(18px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .modal .head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .modal .head h3{margin:0;font-size:17px;color:var(--purple)}
+    .close-x{background:transparent;border:none;font-size:18px;cursor:pointer;color:var(--muted)}
+    .modal .body{margin-top:12px;font-size:14px;color:#16324a}
+    .input-row{margin-top:12px;display:flex;gap:8px;align-items:center}
+    .input-row input[type="text"], .input-row input[type="password"]{
+      flex:1;padding:12px;border-radius:10px;border:1px solid rgba(2,16,36,0.06);font-weight:700;
+      background:#fff;color:#021024;font-size:14px;
+    }
+    .input-row button{padding:12px 14px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--cyan),var(--green));font-weight:800;cursor:pointer}
+    .hint{margin-top:10px;font-size:13px;color:#637a8a}
+    .masked{font-weight:900;letter-spacing:2px;margin-top:10px}
+    .tg-link{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#f2f8ff;border:1px solid #dbeaf9;margin-top:12px;cursor:pointer;text-decoration:none;color:#035;
+      font-weight:800}
+    .tg-link i{font-size:16px}
+    .premium-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#ffe8a8,#ffd36d);font-weight:900;color:#3a1b00;margin-left:8px}
+
+    /* Premium modal special */
+    .premium-modal .feature{
+      display:flex;align-items:center;justify-content:space-between;padding:12px 10px;border-radius:10px;margin-top:10px;background:linear-gradient(180deg,#fff,#fbfbff);
+      border:1px solid rgba(2,16,36,0.03)
+    }
+    .small-muted{color:#6b7b8a;font-size:13px}
+
+    /* responsive */
+    @media (max-width:520px){
+      .top-row{flex-direction:column;align-items:flex-start}
+      .buy-area{flex-direction:column}
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Top Panel -->
+  <div class="panel">
+    <div class="top-row">
+      <div class="brand">
+        <img src="https://i.ibb.co/QvkjzLg6/x.jpg" alt="logo">
+        <div class="titles">
+          <h2>Goa Game Official</h2>
+          <p>Apkmodderkings • Krovnix</p>
+        </div>
+      </div>
+      <div class="meta">
+        <div class="chip" id="onlineUsers"><i class="fa fa-users"></i>&nbsp;190</div>
+        <div class="chip" id="winnerTextSmall">User 662****349 ₹4,684</div>
+      </div>
+    </div>
+    <div class="stage">
+      <div class="label">Current Period (UTC)</div>
+      <div class="value" id="periodNumber">—</div>
+      <div class="label">Next in <span id="timerText">00:00</span></div>
+
+      <div style="margin-top:8px">
+        <div class="label">Result</div>
+        <div id="resultText" class="result small">SMALL</div>
+      </div>
+
+      <div class="server-row">
+        <button id="serverBtn" class="server-btn">Connect Server</button>
+      </div>
+      <div class="footer-note">@Krovnix</div>
+
+      <!-- BUY area -->
+      <div class="buy-area" style="margin-top:18px">
+        <button id="buyPaidBtn" class="btn-buy">Buy paid hack ₹1000</button>
+        <button id="demoBtn" class="btn-secondary">Demo Mode</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Other content (kept logic same) -->
+  <div class="panel">
+    <div class="label">Info</div>
+    <div class="value">WINGO 1Min • Fast predictions</div>
+    <div class="small-muted">Join telegram channel for more free apk</div>
+  </div>
+</div>
+
+<!-- Telegram floating quick link -->
+<a href="https://telegram.me/apkmodderkings" target="_blank" class="tg-float" title="Contact on Telegram">
+  <i class="fab fa-telegram-plane"></i>
+</a>
+
+<!-- Toast -->
+<script>
+<!--
+document.write(unescape("%3Cdiv%20id%3D%22toast%22%20class%3D%22toast%20info%22%3ENotice%3C/div%3E%0A%0A%3C%21--%20Overlay%20modal%20%28Key%20entry%29%20--%3E%0A%3Cdiv%20id%3D%22overlayKey%22%20class%3D%22overlay%22%20aria-hidden%3D%22true%22%3E%0A%20%20%3Cdiv%20class%3D%22modal%22%20role%3D%22dialog%22%20aria-modal%3D%22true%22%20aria-labelledby%3D%22keyModalTitle%22%3E%0A%20%20%20%20%3Cdiv%20class%3D%22head%22%3E%0A%20%20%20%20%20%20%3Ch3%20id%3D%22keyModalTitle%22%3EBuy%20paid%20hack%20%u20B91000%3C/h3%3E%0A%20%20%20%20%20%20%3Cbutton%20class%3D%22close-x%22%20id%3D%22closeKeyModal%22%3E%26times%3B%3C/button%3E%0A%20%20%20%20%3C/div%3E%0A%20%20%20%20%3Cdiv%20class%3D%22body%22%3E%0A%20%20%20%20%20%20%3Cdiv%20style%3D%22font-weight%3A800%3Bmargin-top%3A8px%22%3EEnter%20your%20Key%20to%20activate%3C/div%3E%0A%20%20%20%20%20%20%3Cdiv%20class%3D%22hint%22%3EKey%20daalne%20ke%20baad%20%3Cstrong%3EVerify%20Key%3C/strong%3E%20dabayein.%20Agar%20key%20galat%20ho%20to%20Telegram%20se%20contact%20karein.%3C/div%3E%0A%0A%20%20%20%20%20%20%3Cdiv%20class%3D%22input-row%22%3E%0A%20%20%20%20%20%20%20%20%3Cinput%20id%3D%22keyInput%22%20type%3D%22password%22%20placeholder%3D%22Enter%20Key%22%20autocomplete%3D%22off%22%20/%3E%0A%20%20%20%20%20%20%20%20%3Cbutton%20id%3D%22verifyKeyBtn%22%3EVerify%20Key%3C/button%3E%0A%20%20%20%20%20%20%3C/div%3E%0A%0A%20%20%20%20%20%20%3Cdiv%20class%3D%22masked%22%3E%20password%3C/div%3E%0A%0A%20%20%20%20%20%20%3Ca%20id%3D%22tgContactBtn%22%20class%3D%22tg-link%22%20href%3D%22https%3A//telegram.me/Krovnix%22%20target%3D%22_blank%22%3E%0A%20%20%20%20%20%20%20%20%3Ci%20class%3D%22fab%20fa-telegram-plane%22%3E%3C/i%3E%20Contact%20on%20Telegram%0A%20%20%20%20%20%20%3C/a%3E%0A%0A%20%20%20%20%20%20%3Cdiv%20class%3D%22hint%22%20style%3D%22color%3A%23334a5a%3Bmargin-top%3A10px%22%3E%0A%20%20%20%20%20%20%20%20Agar%20key%20nahi%20hai%20to%20Krovnix%20se%20Telegram%20par%20contact%20karke%20key%20khariden.%20%28Note%3A%20Exact%20app%20logic%20unchanged.%29%0A%20%20%20%20%20%20%3C/div%3E%0A%20%20%20%20%3C/div%3E%0A%20%20%3C/div%3E%0A%3C/div%3E"));
+//-->
+</script>
+
+<!-- Overlay modal (Premium) -->
+<div id="overlayPremium" class="overlay" aria-hidden="true">
+  <div class="modal premium-modal" role="dialog" aria-modal="true" aria-labelledby="premiumTitle">
+    <div class="head">
+      <h3 id="premiumTitle">Premium Access <span class="premium-badge">PREMIUM</span></h3>
+      <button class="close-x" id="closePremiumModal">&times;</button>
+    </div>
+    <div class="body">
+      <div style="font-weight:800;margin-top:6px">Premium features unlocked</div>
+      <div class="hint">Yeh dialog premium users ke liye optimized hai. Neeche same logic wale controls diye gaye hain (quick verify + contact).</div>
+
+      <div class="feature">
+        <div>
+          <div style="font-weight:900">Auto-Optimize</div>
+          <div class="small-muted">Faster predictions, lower latency</div>
+        </div>
+        <div style="font-weight:900">ON</div>
+      </div>
+
+      <div class="feature">
+        <div>
+          <div style="font-weight:900">Stealth Mode</div>
+          <div class="small-muted">Hide logs while using hack</div>
+        </div>
+        <div style="font-weight:900">OFF</div>
+      </div>
+
+      <div style="margin-top:12px" class="input-row">
+        <input id="premiumKeyInput" type="text" placeholder="Enter Premium Key (optional)" autocomplete="off" />
+        <button id="verifyPremiumKeyBtn">Apply</button>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+        <a id="tgPremiumBtn" class="tg-link" href="https://telegram.me/Krovnix" target="_blank">
+          <i class="fab fa-telegram-plane"></i> Contact Krovnix
+        </a>
+        <button id="activatePremiumBtn" class="btn-buy" style="padding:10px 14px;font-size:14px">Activate Premium</button>
+      </div>
+
+      <div class="small-muted" style="margin-top:10px">Correct key dene par additional premium dialog khulega — same logic, optimized UI.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- Preserve original/random UI logic from provided file ---------- */
+const winnerText=document.getElementById("winnerTextSmall");
+const onlineUsers=document.getElementById("onlineUsers");
+const timerText=document.getElementById("timerText");
+const resultText=document.getElementById("resultText");
+const periodNumberEl=document.getElementById("periodNumber");
+
+let lastWinner=0;
+function updateWinner(t){
+  if(!lastWinner||t-lastWinner>2500){
+    lastWinner=t;
+    const id1=Math.floor(Math.random()*380)+620;
+    const id2=Math.floor(Math.random()*1000).toString().padStart(3,'0');
+    const amt=Math.floor(Math.random()*14500)+500;
+    winnerText.textContent=`User ${id1}****${id2} ₹${amt.toLocaleString()}`;
+  }
+  requestAnimationFrame(updateWinner);
+}
+
+let lastUsers=0;
+function updateUsers(t){
+  if(!lastUsers||t-lastUsers>3000){
+    lastUsers=t;
+    const u=Math.floor(Math.random()*21)+180; // random between 180–200
+    onlineUsers.innerHTML=`<i class="fa fa-users"></i>&nbsp;${u}`;
+  }
+  requestAnimationFrame(updateUsers);
+}
+
+function setResultText(kind){
+  resultText.classList.remove("big","small");
+  resultText.textContent=kind;
+  resultText.classList.add(kind==="BIG"?"big":"small");
+}
+function updatePeriod(){
+  const now=new Date();
+  const year=now.getUTCFullYear();
+  const month=String(now.getUTCMonth()+1).padStart(2,'0');
+  const day=String(now.getUTCDate()).padStart(2,'0');
+  const hours=now.getUTCHours();
+  const minutes=now.getUTCMinutes();
+  const seconds=now.getUTCSeconds();
+  const totalMinutes=hours*60+minutes;
+  const periodNum=`${year}${month}${day}1000${10001+totalMinutes}`;
+  periodNumberEl.innerText=periodNum;
+  const lastTwo=periodNum.slice(-2);
+  let sum=lastTwo.split("").map(Number).reduce((a,b)=>a+b,0);
+  if(sum>9) sum=String(sum).split("").map(Number).reduce((a,b)=>a+b,0);
+  const kind=sum>=5?"BIG":"SMALL";
+  setResultText(kind);
+  const remain=60-seconds;
+  timerText.innerText=`00:${String(remain%60).padStart(2,'0')}`;
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  requestAnimationFrame(updateWinner);
+  requestAnimationFrame(updateUsers);
+  setInterval(updatePeriod,1000);
+  updatePeriod();
+});
+
+/* ---------- Toast util ---------- */
+const toastEl = document.getElementById('toast');
+let toastTimer = null;
+function showToast(msg, type='info') {
+  toastEl.textContent = msg;
+  toastEl.className = 'toast show ' + (type || 'info');
+  if(navigator.vibrate) navigator.vibrate(160);
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> {
+    toastEl.classList.remove('show');
+  }, 2800);
+}
+
+/* ---------- Server toggle (kept) ---------- */
+const serverBtn=document.getElementById("serverBtn");
+let serverActive=false;
+serverBtn.addEventListener("click",()=>{
+  serverActive=!serverActive;
+  if(serverActive){
+    showToast("Server Activated","success");
+  }else{
+    showToast("Server Deactivated","error");
+  }
+});
+
+/* ---------- BUY KEY modal logic ---------- */
+const buyPaidBtn = document.getElementById('buyPaidBtn');
+const overlayKey = document.getElementById('overlayKey');
+const closeKeyModal = document.getElementById('closeKeyModal');
+const verifyKeyBtn = document.getElementById('verifyKeyBtn');
+const keyInput = document.getElementById('keyInput');
+const tgContactBtn = document.getElementById('tgContactBtn');
+
+const overlayPremium = document.getElementById('overlayPremium');
+const closePremiumModal = document.getElementById('closePremiumModal');
+const verifyPremiumKeyBtn = document.getElementById('verifyPremiumKeyBtn');
+const premiumKeyInput = document.getElementById('premiumKeyInput');
+const activatePremiumBtn = document.getElementById('activatePremiumBtn');
+
+/*
+  NOTE about keys:
+  - For demo / working client-side flow we use a hardcoded 'correct' key.
+  - Correct Key for basic paid hack: "KEY-PAID-1000"
+  - Correct Key for premium: "PREMIUM-ACCESS-2025"
+  These are only used client-side to demonstrate the dialog flow and UI.
+*/
+
+const BASIC_CORRECT_KEY = "KEY-PAID-1000";
+const PREMIUM_CORRECT_KEY = "PREMIUM-ACCESS-2025";
+
+buyPaidBtn.addEventListener('click', ()=> {
+  // open key modal
+  overlayKey.style.display = 'flex';
+  overlayKey.setAttribute('aria-hidden','false');
+  keyInput.value = '';
+  setTimeout(()=>keyInput.focus(),200);
+});
+
+closeKeyModal.addEventListener('click', ()=> {
+  overlayKey.style.display = 'none';
+  overlayKey.setAttribute('aria-hidden','true');
+});
+
+tgContactBtn.addEventListener('click', ()=> {
+  // opens telegram link (anchor already has target=_blank)
+  showToast("Opening Telegram...", "info");
+});
+
+verifyKeyBtn.addEventListener('click', ()=> {
+  const val = (keyInput.value || '').trim();
+  if(!val){
+    showToast("Please enter a key", "error");
+    return;
+  }
+  if(val === BASIC_CORRECT_KEY){
+    // show premium-like dialog (separate and optimized)
+    overlayKey.style.display = 'none';
+    overlayKey.setAttribute('aria-hidden','true');
+    // open premium modal
+    openPremiumModal(true);
+    showToast("Key verified. Premium dialog opened.", "success");
+  } else {
+    // wrong key: show toast guiding to Telegram contact (Krovnix)
+    showToast("Galat password — Krovnix se Telegram par contact karke key kharidein.", "error");
+    // optional small shake effect
+    shakeElement(keyInput);
+  }
+});
+
+/* Premium modal functions */
+function openPremiumModal(justVerified=false){
+  overlayPremium.style.display = 'flex';
+  overlayPremium.setAttribute('aria-hidden','false');
+  premiumKeyInput.value = '';
+  setTimeout(()=>premiumKeyInput.focus(),220);
+
+  if(justVerified){
+    // show a brief info toast
+    showToast("Welcome premium user — optimized dialog.", "success");
+  }
+}
+
+closePremiumModal.addEventListener('click', ()=> {
+  overlayPremium.style.display = 'none';
+  overlayPremium.setAttribute('aria-hidden','true');
+});
+
+/* Premium key apply */
+verifyPremiumKeyBtn.addEventListener('click', ()=> {
+  const val = (premiumKeyInput.value || '').trim();
+  if(!val){
+    showToast("Enter premium key or contact Krovnix.", "info");
+    return;
+  }
+  if(val === PREMIUM_CORRECT_KEY){
+    // Simulate opening an upgraded premium dialog / confirmation
+    showToast("Premium Key accepted — all premium features unlocked!", "success");
+    // Could show a new small confirmation modal or set UI state here
+    setTimeout(()=>{
+      // brief success panel animation (we reuse toast + keep modal open)
+      overlayPremium.querySelector('.body').insertAdjacentHTML('beforeend',
+        '<div style="margin-top:12px;padding:10px;border-radius:8px;background:linear-gradient(90deg,#f0fff6,#e9fff0);border:1px solid #dff7e8;font-weight:800;color:#065">Premium activated successfully ✅</div>'
+      );
+    },200);
+  } else {
+    showToast("Galat Premium Key — Telegram se key khariden.", "error");
+    shakeElement(premiumKeyInput);
+  }
+});
+
+/* Activate premium button (simulate) */
+activatePremiumBtn.addEventListener('click', ()=> {
+  showToast("Redirecting to Telegram for purchase...", "info");
+  // open telegram channel
+  window.open('https://telegram.me/krovnix','_blank');
+});
+
+/* small UI helpers */
+function shakeElement(el){
+  el.style.transition = 'transform .08s ease';
+  el.style.transform = 'translateX(-8px)';
+  setTimeout(()=> el.style.transform = 'translateX(8px)', 80);
+  setTimeout(()=> el.style.transform = 'translateX(0)', 160);
+  setTimeout(()=> el.style.transition = '', 240);
+}
+
+/* keep click outside to close modals */
+document.addEventListener('click', function(e){
+  // Overlay click to close but not when clicking inside modal
+  if(e.target === overlayKey){
+    overlayKey.style.display = 'none';
+    overlayKey.setAttribute('aria-hidden','true');
+  }
+  if(e.target === overlayPremium){
+    overlayPremium.style.display = 'none';
+    overlayPremium.setAttribute('aria-hidden','true');
+  }
+});
+
+/* Demo button for users who want to try without key (keeps logic unchanged) */
+document.getElementById('demoBtn').addEventListener('click', ()=>{
+  showToast("Demo mode active — limited features.", "info");
+});
+
+</script>
+
+</body>
+</html>
